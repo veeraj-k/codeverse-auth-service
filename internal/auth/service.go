@@ -51,7 +51,7 @@ func (s *AuthService) Login(req LoginRequest) (AuthResponse, error) {
 	for _, role := range user.Role {
 		roles = append(roles, role.Name)
 	}
-	token, err := GenerateToken(user.ID, roles)
+	token, err := GenerateToken(user, roles)
 	if err != nil {
 		return AuthResponse{}, err
 	}

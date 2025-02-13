@@ -4,14 +4,20 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(id uint, roles []string) (string, error) {
+func GenerateToken(user *User, roles []string) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id": id,
+		"user_id": user.ID,
 		"roles":   roles,
+		"iss":     "auth-service",
+		"exp":     time.Now().Add(time.Hour * 72).Unix(),
+		"iat":     time.Now().Unix(),
+		"nbf":     time.Now().Unix(),
+		"email":   user.Email,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -45,7 +51,14 @@ func ValidateToken(token string, roles []string) error {
 	if !ok {
 		return errors.New("invalid token mapping with claims")
 	}
+	exp, ok := claims["exp"].(float64)
+	if !ok {
+		return errors.New("invalid expiration time format")
+	}
 
+	if time.Now().Unix() > int64(exp) {
+		return errors.New("token has expired")
+	}
 	userRoles, ok := claims["roles"].([]interface{})
 	if !ok {
 		return errors.New("roles claim is not an array")
