@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,4 +52,24 @@ func ForwardRequest(c *gin.Context, targetURL string) {
 		return
 	}
 	c.Writer.Write(body)
+}
+
+func ForwardRequestV2(c *gin.Context, target string) {
+	targetURL, err := url.Parse(target)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid service URL"})
+		return
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	fmt.Println(c.Request.URL.RawPath)
+	proxy.Director = func(req *http.Request) {
+		req.Header = c.Request.Header
+		req.URL.Scheme = targetURL.Scheme
+		req.URL.Host = targetURL.Host
+		req.URL.Path = c.Request.URL.Path
+
+	}
+
+	proxy.ServeHTTP(c.Writer, c.Request)
 }
