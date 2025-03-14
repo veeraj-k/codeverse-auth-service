@@ -12,8 +12,14 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
 	userRepo := auth.NewUserRepository(db)
 	adminAuthService := NewAdminAuthService(userRepo)
 	adminHandler := NewAdminAuthHandler(adminAuthService)
+	requiredRoles := map[string][]string{
+		"GET":    {"SUPER_ADMIN", "ADMIN"},
+		"POST":   {"SUPER_ADMIN", "ADMIN"},
+		"PUT":    {"SUPER_ADMIN", "ADMIN"},
+		"DELETE": {"SUPER_ADMIN", "ADMIN"},
+	}
 
-	ar := r.Group("/api/admin", AdminAuthMiddleware([]string{"SUPER_ADMIN", "ADMIN"}))
+	ar := r.Group("/api/admin", AdminAuthMiddleware(requiredRoles))
 
 	ar.POST("/roles", adminHandler.CreateRole)
 	ar.GET("/roles", adminHandler.GetRoles)

@@ -5,6 +5,7 @@ import (
 	"auth-service/db"
 	"auth-service/internal/admin"
 	"auth-service/internal/auth"
+	"auth-service/internal/middlewares/pms"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -26,7 +27,8 @@ func main() {
 
 	auth.RegisterRoutes(r, DB)
 	admin.RegisterRoutes(r, DB)
+	pms.RegisterRoute(r)
 
-	r.Run("127.0.0.1:8080")
+	r.Run("127.0.0.1:4000")
 
 }

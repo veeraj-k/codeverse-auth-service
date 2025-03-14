@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AdminAuthMiddleware(requiredRoles []string) gin.HandlerFunc {
+func AdminAuthMiddleware(requiredRoles map[string][]string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -17,7 +17,8 @@ func AdminAuthMiddleware(requiredRoles []string) gin.HandlerFunc {
 			return
 		}
 
-		err := auth.ValidateToken(strings.Split(authHeader, " ")[1], requiredRoles)
+		reqRoles := requiredRoles[c.Request.Method]
+		err := auth.ValidateToken(strings.Split(authHeader, " ")[1], reqRoles)
 
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
