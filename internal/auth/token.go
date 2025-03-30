@@ -31,7 +31,7 @@ func GenerateToken(user *User, roles []string) (string, error) {
 }
 
 func ValidateToken(token string, roles []string) error {
-	fmt.Println("Token", token)
+	// fmt.Println("Token", token)
 	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

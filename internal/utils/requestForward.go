@@ -18,7 +18,6 @@ func ForwardRequest(c *gin.Context, targetURL string) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
 		return
 	}
-	fmt.Println(targetURL)
 
 	// Copy headers from the original request
 	for key, values := range c.Request.Header {
@@ -26,6 +25,7 @@ func ForwardRequest(c *gin.Context, targetURL string) {
 			req.Header.Add(key, value)
 		}
 	}
+	fmt.Println("Forwarding request to:", targetURL)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -64,12 +64,14 @@ func ForwardRequestV2(c *gin.Context, target string) {
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 	fmt.Println(c.Request.URL.RawPath)
 	proxy.Director = func(req *http.Request) {
-		req.Header = c.Request.Header
+		req.Header = c.Request.Header.Clone()
 		req.URL.Scheme = targetURL.Scheme
 		req.URL.Host = targetURL.Host
 		req.URL.Path = c.Request.URL.Path
-
+		req.Host = targetURL.Host
 	}
+	fmt.Println("Forwarding request to:", targetURL)
 
 	proxy.ServeHTTP(c.Writer, c.Request)
+
 }
