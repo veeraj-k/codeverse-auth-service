@@ -8,7 +8,9 @@ import (
 	"auth-service/internal/middlewares/pms"
 	"auth-service/internal/middlewares/sbsvc"
 	"os"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -28,6 +30,14 @@ func init() {
 func main() {
 
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	r.Handle("GET", "/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
